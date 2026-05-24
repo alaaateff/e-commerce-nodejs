@@ -1,0 +1,22 @@
+services:
+  # mongodb service
+  mongo_db:
+    container_name: db_container
+    image: mongo:latest
+    restart: always
+    volumes: 
+     - mongo_data:/data/db 
+
+  #node.js service
+  app:
+    build: 
+     context: ..
+     dockerfile: docker/Dockerfile
+    ports: 
+     - 4000:3000
+    environment:
+      env_file: "../app/e-commerce-nodejs/.env"
+    depends_on: 
+       - mongo_db
+volumes:
+  mongo_data: {}
