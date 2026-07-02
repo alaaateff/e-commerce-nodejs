@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodejs-deployment
+  labels:
+    app: nodejs
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nodejs
+  template:
+    metadata:
+      labels:
+        app: nodejs
+    spec:
+      containers:
+      - name: nodejs
+        image: alaaatef20/node_js_app_image
+        ports:
+        - containerPort: 3000
+        env:
+         - name: PORT
+           valueFrom: 
+             configMapKeyRef:
+              name: app-cm
+              key: PORT
+         - name: GMAIL
+           valueFrom: 
+             configMapKeyRef:
+              name: app-cm
+              key: GMAIL
+         - name: GMAIL_PASSWORD
+           valueFrom:
+             secretKeyRef:
+              name: app-secret
+              key: GMAIL_PASSWORD
+         - name: JWT_SECRET
+           valueFrom:
+             secretKeyRef:
+              name: app-secret
+              key: JWT_SECRET
+         - name: MONGODB_URL
+           valueFrom: 
+             configMapKeyRef:
+              name: app-cm
+              key: MONGODB_URL
+         - name: NODE_ENV
+           valueFrom: 
+             configMapKeyRef:
+              name: app-cm
+              key: NODE_ENV
+         - name: STRIPE_SECRET_KEY
+           valueFrom:
+             secretKeyRef:
+              name: app-secret
+              key: STRIPE_SECRET_KEY    
+         - name: EMAIL_HOST
+           valueFrom: 
+             configMapKeyRef:
+              name: app-cm
+              key: EMAIL_HOST
+         - name: EMAIL_PORT
+           valueFrom: 
+             configMapKeyRef:
+              name: app-cm
+              key: EMAIL_PORT
