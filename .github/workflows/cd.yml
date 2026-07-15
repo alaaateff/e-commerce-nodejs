@@ -1,0 +1,40 @@
+name: CD Workflow
+
+on:
+  workflow_run:
+    workflows: ['CI Workflow']
+    types:
+      - completed
+
+jobs:
+  cd_pipeline:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ['self-hosted']
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6.0.2
+      
+      - name: Get short Git commit SHA
+        run: |
+          SHA=${{ github.event.workflow_run.head_sha }}
+          echo "COMMIT_SHA=${SHA::7}" >> $GITHUB_ENV
+
+      - name: Start the minikube
+        run:  minikube start
+
+      - name: Creating the secret 
+        run: kubectl create secret generic app-secret \
+             --from-literal=GMAIL_PASSWORD=${{ secrets.GMAIL_PASSWORD }} \
+             --from-literal=JWT_SECRET=${{ secrets.JWT_SECRET }} \
+             --from-literal=STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }} --dry-run=client -o yaml | kubectl apply -f -
+
+
+      - name: Applying the kubernetes manifests files 
+        run: kubectl apply -f kubernetes/
+
+      - name: Setting the deployment image
+        run: kubectl set image deployment/nodejs-deployment nodejs=${{ secrets.DOCKER_HUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${{env.COMMIT_SHA}}
+ 
+      - name: Verify deployment rollout
+        run:  kubectl rollout status deployment/nodejs-deployment
