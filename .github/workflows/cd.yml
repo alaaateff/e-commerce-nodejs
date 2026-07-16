@@ -24,10 +24,12 @@ jobs:
         run:  minikube start
 
       - name: Creating the secret 
-        run: kubectl create secret generic app-secret \
-             --from-literal=GMAIL_PASSWORD=${{ secrets.GMAIL_PASSWORD }} \
-             --from-literal=JWT_SECRET=${{ secrets.JWT_SECRET }} \
-             --from-literal=STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }} --dry-run=client -o yaml | kubectl apply -f -
+        run: |
+          kubectl create secret generic app-secret \
+          --from-literal=GMAIL_PASSWORD=${{ secrets.GMAIL_PASSWORD }} \
+          --from-literal=JWT_SECRET=${{ secrets.JWT_SECRET }} \
+          --from-literal=STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }} \
+          --dry-run=client -o yaml | kubectl apply -f -
 
 
       - name: Applying the kubernetes manifests files 
